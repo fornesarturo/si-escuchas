@@ -15,7 +15,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.*
 import javax.validation.Valid
-
 @CrossOrigin("https://si-escuchas.netlify.app", allowCredentials = "true")
 @RestController
 @RequestMapping("/msg")
@@ -35,7 +34,7 @@ class MessageController @Autowired constructor(
 
     @GetMapping("/sse/{channelId}", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun streamEvents(@PathVariable channelId: String): Flux<ServerSentEvent<Message>> {
-        return messageRepository.findWithTailableCursorByChannelId(channelId)
+        return messageRepository.findRecentMessagesByChannelId(channelId)
                 .map {
                     ServerSentEvent.builder<Message>()
                             .id(it.id!!)
@@ -43,5 +42,14 @@ class MessageController @Autowired constructor(
                             .event(it.message)
                             .build()
                 }
+
+//        return messageRepository.findWithTailableCursorByChannelId(channelId)
+//                .map {
+//                    ServerSentEvent.builder<Message>()
+//                            .id(it.id!!)
+//                            .data(it)
+//                            .event(it.message)
+//                            .build()
+//                }
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.data.mongodb.repository.Tailable
 import reactor.core.publisher.Flux
 
-interface MessageRepository: ReactiveMongoRepository<Message, String> {
+interface MessageRepository: ReactiveMongoRepository<Message, String>, CustomMessageRepository {
     @Tailable
-    fun findWithTailableCursorByChannelId(channelId: String): Flux<Message>;
+    fun findWithTailableCursorByChannelId(channelId: String): Flux<Message>
 }
