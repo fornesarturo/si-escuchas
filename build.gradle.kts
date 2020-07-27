@@ -46,6 +46,12 @@ dependencies {
 	// Security
 	//implementation("org.springframework.boot:spring-boot-starter-security")
 
+	// Reactive MongoDB
+	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+	testImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+	}
+
 	// Test Implementations
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

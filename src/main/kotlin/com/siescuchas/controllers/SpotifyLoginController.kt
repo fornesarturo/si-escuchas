@@ -1,8 +1,11 @@
 package com.siescuchas.controllers
 
 import com.siescuchas.models.SpotifyMe
+import com.siescuchas.models.SpotifySearch
 import com.siescuchas.models.SpotifyToken
 import com.siescuchas.services.SpotifyLoginService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,10 +24,12 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.result.view.RedirectView
+import org.springframework.web.util.UriComponents
+import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import java.util.*
 
-@CrossOrigin("http://localhost:8081")
+@CrossOrigin("https://si-escuchas.netlify.app", allowCredentials = "true")
 @Controller
 @RequestMapping("")
 class SpotifyLoginController @Autowired constructor(
@@ -74,24 +79,55 @@ class SpotifyLoginController @Autowired constructor(
 
         response.addCookie(ResponseCookie
                 .from("access_token", accessToken.accessToken)
-                .httpOnly(true)
+                .httpOnly(false)
                 .build())
 
-        val webAppUrl = "http://localhost:8081/"
+        val webAppUrl = "https://si-escuchas.netlify.app"
         val homeUrl = "$webAppUrl/home"
-        return "redirect:$homeUrl"
+
+        val queryMap: MultiValueMap<String, String> = LinkedMultiValueMap()
+        queryMap.add("access_token", accessToken.accessToken)
+
+        val uriComponents: UriComponents = UriComponentsBuilder
+                .fromHttpUrl(homeUrl)
+                .queryParams(queryMap)
+                .encode()
+                .build()
+        val uriString = uriComponents.toUri().toURL().toString()
+
+        return "redirect:$uriString"
     }
 
     @GetMapping("/refresh_token")
     @ResponseBody
     suspend fun refreshToken(response: ServerHttpResponse, @CookieValue("refresh_token") refreshToken: String): SpotifyToken {
-        return spotifyLoginService.getRefreshToken(refreshToken)
+        return coroutineScope {
+            val token = spotifyLoginService.getRefreshToken(refreshToken)
+            response.addCookie(ResponseCookie
+                    .from("access_token", token.accessToken)
+                    .httpOnly(false)
+                    .build())
+            token
+        }
     }
 
     @GetMapping("/me")
-    suspend fun getInfo(model: Model,
-                @CookieValue("access_token") accessToken: String
+    @ResponseBody
+    suspend fun getInfo(
+            @CookieValue("access_token") accessToken: String
     ): SpotifyMe {
         return spotifyLoginService.getMe(accessToken)
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    suspend fun getSearch(
+            @CookieValue("access_token") accessToken: String,
+            @RequestParam("query") query: String
+    ): SpotifySearch {
+        return coroutineScope {
+            val searchSuspend = async { spotifyLoginService.getSearch(accessToken, query) }
+            searchSuspend.await()
+        }
     }
 }

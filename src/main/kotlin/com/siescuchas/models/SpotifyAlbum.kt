@@ -3,14 +3,14 @@ package com.siescuchas.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.ArrayList
 
-class SpotifyMe(
+class SpotifyAlbum(
         val id: String,
-        val country: String,
-        @JsonProperty("display_name") val displayName: String, // Received as display_name
-        val email: String,
-        val href: String,
+        val name: String,
+        val uri: String,
+        @JsonProperty("release_date") val releaseDate: String,
         var externalUrl: String = "",
-        var profilePicture: String = ""
+        var cover: String = "",
+        var artists: ArrayList<SpotifyArtist>
 ) {
     @JsonProperty("external_urls")
     private fun unpackExternalUrls(externalUrls: Map<String, String>) {
@@ -20,10 +20,10 @@ class SpotifyMe(
     @JsonProperty("images")
     private fun unpackImage(images: ArrayList<Map<String, String?>>) {
         val imageMap = images.get(0)
-        this.profilePicture = imageMap.getOrDefault("url", "")!!
+        this.cover = imageMap.getOrDefault("url", "")!!
     }
 
     override fun toString(): String {
-        return "InfoResponse[id=$id, country=$country, displayName=$displayName, email=$email, href=$href, externalUrl=$externalUrl, profilePicture=$profilePicture]"
+        return "SpotifyAlbum[id=$id, name=$name, uri=$uri, releaseDate=$releaseDate, externalUrl=$externalUrl, cover=$cover]"
     }
 }

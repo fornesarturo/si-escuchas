@@ -1,6 +1,7 @@
 package com.siescuchas.services
 
 import com.siescuchas.models.SpotifyMe
+import com.siescuchas.models.SpotifySearch
 import com.siescuchas.models.SpotifyToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ class SpotifyLoginService() {
         private var properties: Properties
 
         init {
-            val propertiesFile = File(javaClass.classLoader.getResource("local.properties").file)
+            val propertiesFile = File(javaClass.classLoader.getResource("local.properties")!!.file)
             val inputStream = propertiesFile.inputStream()
             properties = Properties().apply {
                 load(inputStream)
@@ -85,9 +86,10 @@ class SpotifyLoginService() {
         val uriComponents: UriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://accounts.spotify.com/authorize")
                 .queryParams(queryMap)
+                .encode()
                 .build()
         val uriString = uriComponents.toUri().toURL().toString()
-
+        println(uriString)
         return Pair(uriString, state)
     }
 
@@ -137,5 +139,31 @@ class SpotifyLoginService() {
                 .onStatus(HttpStatus::is4xxClientError, ::handle400)
                 .onStatus(HttpStatus::is5xxServerError, ::handle500)
                 .awaitBody<SpotifyMe>()
+    }
+
+    suspend fun getSearch(accessToken: String, query: String): SpotifySearch {
+        val queryMap: MultiValueMap<String, String> = LinkedMultiValueMap()
+        queryMap.add("q", query)
+        queryMap.add("market", "from_token")
+        queryMap.add("limit", "10")
+        queryMap.add("type", "track")
+
+        val uriComponents: UriComponents = UriComponentsBuilder
+                .fromHttpUrl("https://api.spotify.com/v1/search")
+                .queryParams(queryMap)
+                .encode()
+                .build()
+        val uriString = uriComponents.toUri().toURL().toString()
+        val spotifyWebClient = WebClient.create(uriString)
+        var res = spotifyWebClient
+                .get()
+                .header("Authorization", "Bearer ${accessToken}")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, ::handle400)
+                .onStatus(HttpStatus::is5xxServerError, ::handle500)
+                .awaitBody<SpotifySearch>()
+        println(res)
+        return res
     }
 }
