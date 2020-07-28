@@ -10,7 +10,8 @@ class SpotifyTrack (
         var duration: String = "",
         var externalUrl: String = "",
         val artists: ArrayList<SpotifyArtist>,
-        val album: SpotifyAlbum
+        val album: SpotifyAlbum,
+        val explicit: Boolean?
 ) {
     @JsonProperty("duration_ms")
     private fun parseMSToMinutes(duration_ms: Int) {
@@ -26,6 +27,6 @@ class SpotifyTrack (
     }
 
     override fun toString(): String {
-        return "SpotifyTrack[id=$id, name=$name, uri=$uri, duration=$duration, externalUrl=$externalUrl, album=$album, artists=$artists]"
+        return "SpotifyTrack[id=$id, name=$name, uri=$uri, duration=$duration, externalUrl=$externalUrl, explicit=$explicit, album=$album, artists=$artists]"
     }
 }

@@ -1,5 +1,6 @@
 package com.siescuchas.controllers
 
+import com.siescuchas.errors.HttpError
 import com.siescuchas.models.SpotifyMe
 import com.siescuchas.models.SpotifySearch
 import com.siescuchas.models.SpotifyToken
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseEntity
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Controller
@@ -129,5 +131,11 @@ class SpotifyLoginController @Autowired constructor(
             val searchSuspend = async { spotifyLoginService.getSearch(accessToken, query) }
             searchSuspend.await()
         }
+    }
+
+    @ExceptionHandler
+    fun handleHttpError(e: HttpError): ResponseEntity<String> {
+        val status = e.status ?: 500
+        return ResponseEntity(e.message, HttpStatus.valueOf(status))
     }
 }

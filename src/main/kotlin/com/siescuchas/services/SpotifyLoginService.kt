@@ -1,12 +1,16 @@
 package com.siescuchas.services
 
+import com.siescuchas.errors.HttpError
 import com.siescuchas.models.SpotifyMe
 import com.siescuchas.models.SpotifySearch
 import com.siescuchas.models.SpotifyToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -20,27 +24,24 @@ import reactor.core.publisher.Mono
 import java.io.File
 import java.util.*
 
+@Configuration
 @Service
 class SpotifyLoginService() {
     companion object {
-        private var properties: Properties
-
-        init {
-            val propertiesFile = File(javaClass.classLoader.getResource("local.properties")!!.file)
-            val inputStream = propertiesFile.inputStream()
-            properties = Properties().apply {
-                load(inputStream)
-            }
-        }
-
-        val CLIENT_ID: String = properties.getProperty("CLIENT_ID", "") // Your client id
-        val CLIENT_SECRET: String = properties.getProperty("CLIENT_SECRET", "") // Your secret
-        val REDIRECT_URI: String = properties.getProperty("REDIRECT_URI", "") // Your redirect uri
+//        private var properties: Properties
+//
+//        init {
+//            val propertiesFile = File(javaClass.classLoader.getResource("application.properties")!!.file)
+//            val inputStream = propertiesFile.inputStream()
+//            properties = Properties().apply {
+//                load(inputStream)
+//            }
+//        }
+//        val CLIENT_ID: String = properties.getProperty("CLIENT_ID", "") // Your client id
+//        val CLIENT_SECRET: String = properties.getProperty("CLIENT_SECRET", "") // Your secret
+//        val REDIRECT_URI: String = properties.getProperty("REDIRECT_URI", "") // Your redirect uri
 
         val BASE64_ENCODER: Base64.Encoder = Base64.getEncoder()
-        val AUTH_STRING = "$CLIENT_ID:$CLIENT_SECRET".let {
-            BASE64_ENCODER.encodeToString(it.toByteArray())
-        }
 
         private val logger: Logger = LoggerFactory.getLogger(SpotifyLoginService::class.java)
 
@@ -56,21 +57,22 @@ class SpotifyLoginService() {
         };
 
         fun handle400(response: ClientResponse): Mono<Error> {
-            response.bodyToMono(String::class.java).subscribe(
-                    { value -> logger.error(value) },
-                    { error -> error.message?.let{ println(it) } }
-            )
-            return Mono.just(Error("Your Bad"))
+            return response.bodyToMono(HttpError::class.java)
         }
 
         fun handle500(response: ClientResponse): Mono<Error> {
-            response.bodyToMono(String::class.java).subscribe(
-                    { value -> logger.error(value) },
-                    { error -> error.message?.let{ println(it) } }
-            )
-            return Mono.just(Error("Your Bad"))
+            return response.bodyToMono(HttpError::class.java)
         }
     }
+
+    @Value("\${spotify.CLIENT_ID}")
+    lateinit var CLIENT_ID: String
+
+    @Value("\${spotify.CLIENT_SECRET}")
+    lateinit var CLIENT_SECRET: String
+
+    @Value("\${spotify.REDIRECT_URI}")
+    lateinit var REDIRECT_URI: String
 
     fun getLoginURI(): Pair<String, String> {
         val scope: String = "user-read-private user-read-email streaming"
@@ -100,10 +102,13 @@ class SpotifyLoginService() {
         bodyMap.add("redirect_uri", REDIRECT_URI)
         bodyMap.add("grant_type", "authorization_code")
 
+        var authString = "$CLIENT_ID:$CLIENT_SECRET".let {
+            BASE64_ENCODER.encodeToString(it.toByteArray())
+        }
         val spotifyWebClient = WebClient.create("https://accounts.spotify.com/api/token")
         return spotifyWebClient
                 .post()
-                .header("Authorization", "Basic $AUTH_STRING")
+                .header("Authorization", "Basic $authString")
                 .body(BodyInserters.fromFormData(bodyMap))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -117,10 +122,13 @@ class SpotifyLoginService() {
         val bodyMap: MultiValueMap<String, String> = LinkedMultiValueMap()
         bodyMap.add("refresh_token", refreshToken)
         bodyMap.add("grant_type", "refresh_token")
+        var authString = "$CLIENT_ID:$CLIENT_SECRET".let {
+            BASE64_ENCODER.encodeToString(it.toByteArray())
+        }
         val spotifyWebClient = WebClient.create("https://accounts.spotify.com/api/token")
         return spotifyWebClient
                 .post()
-                .header("Authorization", "Basic $AUTH_STRING")
+                .header("Authorization", "Basic $authString")
                 .body(BodyInserters.fromFormData(bodyMap))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
