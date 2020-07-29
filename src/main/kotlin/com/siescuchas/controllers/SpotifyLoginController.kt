@@ -51,6 +51,8 @@ class SpotifyLoginController @Autowired constructor(
         val stateCookie = ResponseCookie
                 .from("state", state)
                 .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
                 .build()
         response.addCookie(stateCookie)
 
@@ -68,6 +70,8 @@ class SpotifyLoginController @Autowired constructor(
                 .from("state", stateCookie)
                 .httpOnly(true)
                 .maxAge(0)
+                .sameSite("None")
+                .secure(true)
                 .build())
 
         val accessToken = spotifyLoginService.getAccessToken(code)
@@ -76,12 +80,16 @@ class SpotifyLoginController @Autowired constructor(
             response.addCookie(ResponseCookie
                     .from("refresh_token", accessToken.refreshToken)
                     .httpOnly(true)
+                    .sameSite("None")
+                    .secure(true)
                     .build())
         }
 
         response.addCookie(ResponseCookie
                 .from("access_token", accessToken.accessToken)
-                .httpOnly(false)
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
                 .build())
 
         val webAppUrl = "https://si-escuchas.netlify.app"
@@ -107,7 +115,9 @@ class SpotifyLoginController @Autowired constructor(
             val token = spotifyLoginService.getRefreshToken(refreshToken)
             response.addCookie(ResponseCookie
                     .from("access_token", token.accessToken)
-                    .httpOnly(false)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .secure(true)
                     .build())
             token
         }
