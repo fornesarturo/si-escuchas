@@ -15,7 +15,6 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.*
 import javax.validation.Valid
-@CrossOrigin("https://si-escuchas.netlify.app", allowCredentials = "true")
 @RestController
 @RequestMapping("/msg")
 class MessageController @Autowired constructor(

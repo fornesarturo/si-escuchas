@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.config.EnableWebFlux
 import java.text.NumberFormat
 
-
-@EnableWebFlux
 @SpringBootApplication
 @ComponentScan
 class ApiApplication

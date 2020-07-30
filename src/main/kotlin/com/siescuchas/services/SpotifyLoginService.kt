@@ -28,19 +28,6 @@ import java.util.*
 @Service
 class SpotifyLoginService() {
     companion object {
-//        private var properties: Properties
-//
-//        init {
-//            val propertiesFile = File(javaClass.classLoader.getResource("application.properties")!!.file)
-//            val inputStream = propertiesFile.inputStream()
-//            properties = Properties().apply {
-//                load(inputStream)
-//            }
-//        }
-//        val CLIENT_ID: String = properties.getProperty("CLIENT_ID", "") // Your client id
-//        val CLIENT_SECRET: String = properties.getProperty("CLIENT_SECRET", "") // Your secret
-//        val REDIRECT_URI: String = properties.getProperty("REDIRECT_URI", "") // Your redirect uri
-
         val BASE64_ENCODER: Base64.Encoder = Base64.getEncoder()
 
         private val logger: Logger = LoggerFactory.getLogger(SpotifyLoginService::class.java)

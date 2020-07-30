@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 // https://si-escuchas.netlify.app
-@CrossOrigin("https://si-escuchas.netlify.app", allowCredentials = "true")
 @RestController
 @RequestMapping("/channel")
 class ChannelController @Autowired constructor(

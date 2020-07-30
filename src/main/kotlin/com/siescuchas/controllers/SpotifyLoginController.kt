@@ -31,7 +31,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import java.util.*
 
-@CrossOrigin("https://si-escuchas.netlify.app", allowCredentials = "true")
 @Controller
 @RequestMapping("")
 class SpotifyLoginController @Autowired constructor(
@@ -62,17 +61,8 @@ class SpotifyLoginController @Autowired constructor(
     @GetMapping("/callback")
     suspend fun callback(request: ServerHttpRequest,
                          response: ServerHttpResponse,
-                 @RequestParam("code") code: String,
-                 @RequestParam("state") state: String,
-                 @CookieValue("state") stateCookie: String
+                 @RequestParam("code") code: String
     ): String {
-        response.addCookie(ResponseCookie
-                .from("state", stateCookie)
-                .httpOnly(true)
-                .maxAge(0)
-                .sameSite("None")
-                .secure(true)
-                .build())
 
         val accessToken = spotifyLoginService.getAccessToken(code)
 
