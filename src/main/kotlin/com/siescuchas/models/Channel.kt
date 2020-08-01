@@ -6,5 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "channel")
 class Channel (
         @Id var id: String?,
-        val owner: String
-        )
+        val owner: String,
+        val connected: ArrayList<String> = ArrayList(),
+        val queue: ArrayList<SpotifyTrack> = ArrayList()
+)

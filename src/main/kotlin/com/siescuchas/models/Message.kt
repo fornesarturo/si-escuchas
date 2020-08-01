@@ -13,9 +13,10 @@ class Message (
         val track: SpotifyTrack?,
         val sender: String,
         val channelId: String,
+        val second: Long?,
         val createdAt: Date
 ) {
     override fun toString(): String {
-        return "Message[id=$id, message=$message, trackUri=$trackUri, track=$track, sender=$sender, channelId=$channelId, createdAt=$createdAt]"
+        return "Message[id=$id, message=$message, trackUri=$trackUri, track=$track, sender=$sender, channelId=$channelId, second=$second createdAt=$createdAt]"
     }
 }

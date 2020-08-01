@@ -82,7 +82,7 @@ class SpotifyLoginController @Autowired constructor(
                 .secure(true)
                 .build())
 
-        val webAppUrl = "https://si-escuchas.netlify.app"
+        val webAppUrl = "http://localhost:8081"
         val homeUrl = "$webAppUrl/home"
 
         val queryMap: MultiValueMap<String, String> = LinkedMultiValueMap()
